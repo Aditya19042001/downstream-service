@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: downstream-service
+  namespace: load-testing
+  labels:
+    app: downstream
+spec:
+  type: ClusterIP  # Internal service only
+  selector:
+    app: downstream
+  ports:
+  - port: 8001
+    targetPort: 8001
+    protocol: TCP
+    name: http

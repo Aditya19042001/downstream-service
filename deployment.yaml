@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: downstream-service
+  namespace: load-testing
+  labels:
+    app: downstream
+    service: slow-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: downstream
+  template:
+    metadata:
+      labels:
+        app: downstream
+        service: slow-api
+    spec:
+      containers:
+      - name: downstream
+        image: downstream-service:latest
+        imagePullPolicy: Never  
+        ports:
+        - containerPort: 8001
+          name: http
+        env:
+        - name: DEFAULT_DELAY
+          value: "3"
+        - name: MAX_DELAY
+          value: "30"
+        - name: FAILURE_RATE
+          value: "0.0"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 5
